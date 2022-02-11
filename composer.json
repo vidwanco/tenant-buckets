@@ -1,21 +1,27 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "vidwanco/tenant-buckets",
+    "description": "Provision S3 Buckets for each tenant.",
     "keywords": [
-        ":vendor_name",
-        ":package_slug"
+        "Vidwan Co.",
+        "tenant-buckets",
+        "Tenancy For Laravel",
+        "tenancyforlaravel",
+        "archtechx/tenancy",
+        "stancl/tenancy"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/vidwan-co/tenant-buckets",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Shashwat Mishra",
+            "email": "shashwat@vidwan.co",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": "^8.0"
+        "php": "^8.0",
+        "aws/aws-sdk-php": "~3.0",
+        "stancl/tenancy": "^3.4"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
@@ -24,12 +30,12 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src"
+            "Vidwan\\TenantBuckets\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "Vidwan\\TenantBuckets\\Tests\\": "tests"
         }
     },
     "scripts": {
