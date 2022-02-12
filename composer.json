@@ -6,8 +6,6 @@
         "tenant-buckets",
         "Tenancy For Laravel",
         "tenancyforlaravel",
-        "archtechx/tenancy",
-        "stancl/tenancy"
     ],
     "homepage": "https://github.com/vidwan-co/tenant-buckets",
     "license": "MIT",
