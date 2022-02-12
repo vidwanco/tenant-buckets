@@ -49,8 +49,7 @@ class Bucket
         ?string $region = null,
         ?string $endpoint = null,
         ?bool $pathStyle = null
-    )
-    {
+    ) {
         $this->tenant = $tenant;
         $this->credentials = $credentials ?? new Credentials(
             config('filesystems.disks.s3.key'),
