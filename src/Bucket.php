@@ -2,30 +2,32 @@
 
 namespace Vidwan\TenantBuckets;
 
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
-
-use Aws\S3\S3Client;
-use Aws\Exception\AwsException;
 use Aws\Credentials\Credentials;
+
+use Aws\Exception\AwsException;
+use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Log;
-use phpDocumentor\Reflection\Types\Null_;
+use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Vidwan\TenantBuckets\Events\CreatedBucket;
 use Vidwan\TenantBuckets\Events\CreatingBucket;
 
-class Bucket {
-
+class Bucket
+{
     /**
      * @access public
-     * @var $tenant Current Tenant
-     * @var $credentials AWS Credentials Object
-     * @var $endpoint AWS/Minio Endpoint
-     * @var $region AWS/Minio Region
-     * @var $pathStyle Use Path style endpoint (used for minio)
+     * @var Current Tenant
+     * @var AWS Credentials Object
+     * @var AWS/Minio Endpoint
+     * @var AWS/Minio Region
+     * @var Use Path style endpoint (used for minio)
      * @access protected
-     * @var string|null $createdBucketName Name of the Created Bucket
-     * @var Aws\Exception\AwsException|null $e Exception Error Bag
+     * @var string|null Name of the Created Bucket
+     * @var Aws\Exception\AwsException|null Exception Error Bag
      */
-    public $tenant, $credentials, $endpoint, $region;
+    public $tenant;
+    public $credentials;
+    public $endpoint;
+    public $region;
     public string $version = "2006-03-01";
     public bool $pathStyle = false;
     protected string|null $createdBucketName;
@@ -41,11 +43,13 @@ class Bucket {
      * @param bool $pathStyle Use Path Style Endpoint (set `true` for minio, default: false)
      * @return void
      */
-    public function __construct(TenantWithDatabase $tenant,
-                    ?Credentials $credentials = null,
-                    ?string $region = null,
-                    ?string $endpoint = null,
-                    ?bool $pathStyle = null)
+    public function __construct(
+        TenantWithDatabase $tenant,
+        ?Credentials $credentials = null,
+        ?string $region = null,
+        ?string $endpoint = null,
+        ?bool $pathStyle = null
+    )
     {
         $this->tenant = $tenant;
         $this->credentials = $credentials ?? new Credentials(
@@ -88,7 +92,7 @@ class Bucket {
             "endpoint" => $this->endpoint,
             "region" => $this->region,
             "version" => $this->version,
-            "use_path_style_endpoint"  => $this->pathStyle,
+            "use_path_style_endpoint" => $this->pathStyle,
         ];
 
         $client = new S3Client($params);
@@ -102,7 +106,6 @@ class Bucket {
             // Update Tenant
             $this->tenant->tenant_bucket = $name;
             $this->tenant->save();
-
         } catch (AwsException $e) {
             $this->e = $e;
             Log::error($this->getErrorMessage());

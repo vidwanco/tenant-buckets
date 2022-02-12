@@ -28,11 +28,10 @@ class TenantBucketBootstrapper implements TenancyBootstrapper
 
     public function bootstrap(Tenant $tenant)
     {
-         // Select Bucket Name
+        // Select Bucket Name
         $bucket = 'tenant'.$tenant->getTenantKey();
         $bucket = $tenant->tenant_bucket ?? $bucket;
         $this->app['config']['filesystems.disks.s3.bucket'] = $bucket;
-
     }
 
     public function revert()

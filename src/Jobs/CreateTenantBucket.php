@@ -12,13 +12,16 @@ use Vidwan\TenantBuckets\Bucket;
 
 class CreateTenantBucket implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-	/**
-	 * Current Tenant
-	 * @access protected
-	 */
-	protected $tenant;
+    /**
+     * Current Tenant
+     * @access protected
+     */
+    protected $tenant;
 
     /**
      * Create a new job instance.
@@ -28,7 +31,7 @@ class CreateTenantBucket implements ShouldQueue
     public function __construct(TenantWithDatabase $tenant)
     {
         //
-		$this->tenant = $tenant;
+        $this->tenant = $tenant;
     }
 
     /**
@@ -45,15 +48,15 @@ class CreateTenantBucket implements ShouldQueue
         // $this->tenant->save();
     }
 
-	/**
-	* Get the tags that should be assigned to the job.
-	*
-	* @return  array
-	*/
-	public function tags()
-	{
-		return [
-			'tenant:' . $this->tenant->id,
-		];
-	}
+    /**
+    * Get the tags that should be assigned to the job.
+    *
+    * @return  array
+    */
+    public function tags()
+    {
+        return [
+            'tenant:' . $this->tenant->id,
+        ];
+    }
 }
