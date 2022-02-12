@@ -1,6 +1,6 @@
 {
-    "name": "vidwanco/tenant-buckets",
-    "description": "Provision S3 Buckets for each tenant.",
+    "name": "vidwan/tenant-buckets",
+    "description": "Automatically Provision AWS S3 Buckets for tenants.",
     "keywords": [
         "Vidwan Co.",
         "tenant-buckets",
