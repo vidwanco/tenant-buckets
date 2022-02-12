@@ -1,7 +1,7 @@
 # Provision S3 Buckets for each tenant.
 ![Vidwan/Tenant-Buckets](https://banners.beyondco.de/Tenant%20Buckets.png?theme=dark&packageManager=composer+require&packageName=vidwan%2Ftenant-buckets&pattern=circuitBoard&style=style_1&description=Provision+S3+Buckets+for+tenants.&md=1&showWatermark=0&fontSize=100px&images=collection)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/vidwanco/tenant-buckets.svg?style=flat-square)](https://packagist.org/packages/vidwanco/tenant-buckets)
-[![Tests](https://github.com/vidwan-co/tenant-buckets/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/vidwan-co/tenant-buckets/actions/workflows/run-tests.yml)
+[![Tests](https://github.com/vidwanco/tenant-buckets/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/vidwan-co/tenant-buckets/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/vidwan-co/tenant-buckets.svg?style=flat-square)](https://packagist.org/packages/vidwan-co/tenant-buckets)
 
 Automatically Provision AWS S3 Buckets for each tenant. It's an Extention for [TenancyForLaravel](https://tenancyforlaravel.com/).
