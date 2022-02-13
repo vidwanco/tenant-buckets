@@ -48,7 +48,11 @@ Ensure your S3 configuration has all the Key/Value pairs, as below:
 
 ### 2. Tenancy Config
 
-Add the bootstrapper `Vidwan\TenantBuckets\Bootstrappers\TenantBucketBootstrapper::class` to the tenancy config file under `bootstrappers`.
+Add the `TenantBucketBootstrapper::class` to the tenancy config file under `bootstrappers`.
+
+```php
+Vidwan\TenantBuckets\Bootstrappers\TenantBucketBootstrapper::class
+```
 
 **File:** `config/tenancy.php`
 ```php
