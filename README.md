@@ -4,7 +4,7 @@
 [![Tests](https://github.com/vidwanco/tenant-buckets/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/vidwan-co/tenant-buckets/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/vidwan-co/tenant-buckets.svg?style=flat-square)](https://packagist.org/packages/vidwan-co/tenant-buckets)
 
-Automatically Provision AWS S3 Buckets for each tenant. It's an Extention for [TenancyForLaravel](https://tenancyforlaravel.com/). Refer to [TenancyForLaravel](https://tenancyforlaravel.com/) for more details.
+Automatically Provision AWS S3 Buckets for each tenant. It's an Extention for [stancl/tenancy](https://github.com/stancl/tenancy). For more details refer to [TenancyForLaravel](https://tenancyforlaravel.com/).
 
 ## Concept
 
