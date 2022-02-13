@@ -16,6 +16,9 @@ Then using a bootstrapper updating the bucket in config `filesystems.disks.s3.bu
 This is still a **work in progress** and may not be useable. Please use at your own risks.
 > Collaboration are always helpful 😃
 
+- [x] Automatic Bucket Creation
+- [ ] Selecting the created bucket during `TenancyInitialized`
+
 ## Installation
 
 You can install the package via composer:
