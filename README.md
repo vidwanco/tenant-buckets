@@ -21,7 +21,7 @@ This is still a **work in progress** and may not be usable. Please use at your o
 - [x] Automatic Bucket Creation
 - [x] Selecting the created bucket during Tenancy Bootstrapping.
 
-> **Note:** I have still not tested this package under ***production*** environment or with a real AWS S3 Bucket. I have only tested it under ***development*** environment using MINIO. I will update this after testing it on AWS S3 Bucket with an additional section on AWS IAM Policy Setup for creating the bucket using `aws-sdk-php`. Untill then, if you have tested, a PR is welcome.
+> **Note:** I have still not tested this package under ***production*** environment or with a real AWS S3 Bucket. I have only tested it under ***development*** environment using [MinIO](https://min.io/). I will update this after testing it on AWS S3 Bucket with an additional section on AWS IAM Policy Setup for creating the buckets using `aws-sdk-php`. Untill then, if you have tested, a PR is welcome.
 
 ## Installation
 
