@@ -88,6 +88,39 @@ Make sure the `s3` is commented in `tenancy.filesystem.disks` config.
     ],
 ```
 
+### 3. Job Pipeline
+
+Add `Vidwan\TenantBuckets\Jobs\CreateTenantBucket` in `JobPipeline::make()`
+
+**File:** `app/Providers/TenancyServiceProviders.php`
+```php
+use Vidwan\TenantBuckets\Jobs\CreateTenantBucket;
+
+...
+
+    public function events()
+    {
+        return [
+            // Tenant events
+            ...
+            Events\TenantCreated::class => [
+                JobPipeline::make([
+                    Jobs\CreateDatabase::class,
+                    Jobs\MigrateDatabase::class,
+                    Jobs\SeedDatabase::class,
+                    // Your own jobs to prepare the tenant.
+                    // Provision API keys, create S3 buckets, anything you want!
+					CreateTenantBucket::class, // <-- Place it Here
+					
+                ])->send(function (Events\TenantCreated $event) {
+                    return $event->tenant;
+                })->shouldBeQueued(false),
+            ],
+            ...
+        ];
+    }
+```
+
 Cheers! 🥳
 ## Testing
 
