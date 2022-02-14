@@ -110,7 +110,7 @@ use Vidwan\TenantBuckets\Jobs\CreateTenantBucket;
                     Jobs\SeedDatabase::class,
                     // Your own jobs to prepare the tenant.
                     // Provision API keys, create S3 buckets, anything you want!
-					CreateTenantBucket::class, // <-- Place it Here
+                    CreateTenantBucket::class, // <-- Place it Here
 					
                 ])->send(function (Events\TenantCreated $event) {
                     return $event->tenant;
