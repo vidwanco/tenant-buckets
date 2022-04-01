@@ -11,15 +11,12 @@ Automatically Provision AWS S3 Buckets for each tenant. It's an Extention for [s
 The concept is simple. It is to automatically provison a new AWS S3 bucket for tenant on registration and update the same on the central database's tenant table & data coloumn under `tenant_bucket`.
 Then using a bootstrapper updating the bucket in config `filesystems.disks.s3.bucket` during runtime when in Tenant's context and then reverting it back on central context.
 
-## 🚧 Work In Progress 🚧
-
-This is still a **work in progress** and may not be usable. Please use at your own risks.
-> Collaborations are always helpful 😃
-
 ### Roadmap
 
 - [x] Automatic Bucket Creation
 - [x] Selecting the created bucket during Tenancy Bootstrapping.
+- [ ] Deletion of Bucket when the Tenant is deleted.
+- [ ] Testing with Amazon S3 service.
 
 > **Note:** I have still not tested this package under ***production*** environment or with a real AWS S3 Bucket. I have only tested it under ***development*** environment using [MinIO](https://min.io/). I will update this after testing it on AWS S3 Bucket with an additional section on AWS IAM Policy Setup for creating the buckets using `aws-sdk-php`. Untill then, if you have tested, a PR is welcome.
 
