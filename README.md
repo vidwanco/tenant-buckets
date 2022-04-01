@@ -65,7 +65,7 @@ Vidwan\TenantBuckets\Bootstrappers\TenantBucketBootstrapper::class
 ```php
     'bootstrappers' => [
         // Tenancy Bootstrappers
-		Vidwan\TenantBuckets\Bootstrappers\TenantBucketBootstrapper::class,
+        Vidwan\TenantBuckets\Bootstrappers\TenantBucketBootstrapper::class,
     ],
 ```
 
