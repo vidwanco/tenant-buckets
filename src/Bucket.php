@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\Log;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Vidwan\TenantBuckets\Events\CreatedBucket;
 use Vidwan\TenantBuckets\Events\CreatingBucket;
+use Vidwan\TenantBuckets\Events\DeletedBucket;
+use Vidwan\TenantBuckets\Events\DeletingBucket;
 
 class Bucket
 {
     /**
      * @access public
-     * @var Current Tenant
+     * @var Stancl\Tenancy\Contracts\TenantWithDatabase Tenant
      * @var AWS Credentials Object
      * @var AWS/Minio Endpoint
      * @var AWS/Minio Region
@@ -75,6 +77,19 @@ class Bucket
     }
 
     /**
+     * Delete Tenant Specific Bucket
+     *
+     * @access public
+     * @return self $this
+     */
+    public function deleteTenantBucket(): self
+    {
+        $bucketName = $this->tenant->tenant_bucket;
+
+        return $bucketName ? $this->deleteBucket($bucketName, $this->credentials) : false;
+    }
+
+    /**
      * Create a New Bucket
      *
      * @param string $name Name of the S3 Bucket
@@ -111,6 +126,43 @@ class Bucket
         }
 
         event(new CreatedBucket($this->tenant));
+
+        return $this;
+    }
+
+    /**
+     * Create a New Bucket
+     *
+     * @param string $name Name of the S3 Bucket
+     * @param Aws\Credentials\Credentials $credentials AWS Credentials Object
+     * @access public
+     * @return self $this
+     */
+    public function deleteBucket(string $name, Credentials $credentials): self
+    {
+        event(new DeletingBucket($this->tenant));
+
+        $params = [
+            "credentials" => $credentials,
+            "endpoint" => $this->endpoint,
+            "region" => $this->region,
+            "version" => $this->version,
+            "use_path_style_endpoint" => $this->pathStyle,
+        ];
+
+        $client = new S3Client($params);
+
+        try {
+            $exec = $client->deleteBucket([
+                'Bucket' => $name,
+            ]);
+
+        } catch (AwsException $e) {
+            $this->e = $e;
+            Log::error($this->getErrorMessage());
+        }
+
+        event(new DeletedBucket($this->tenant));
 
         return $this;
     }
