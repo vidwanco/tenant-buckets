@@ -156,7 +156,6 @@ class Bucket
             $exec = $client->deleteBucket([
                 'Bucket' => $name,
             ]);
-
         } catch (AwsException $e) {
             $this->e = $e;
             Log::error($this->getErrorMessage());
