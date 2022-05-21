@@ -8,14 +8,14 @@ Automatically Provision AWS S3 Buckets for each tenant. It's an Extention for [s
 
 ## Concept
 
-The concept is simple. It is to automatically provison a new AWS S3 bucket for tenant on registration and update the same on the central database's tenant table & data coloumn under `tenant_bucket`.
+The concept is simple, to automatically provison a new AWS S3 bucket for tenant on registration and update the same on the central database's tenant table & data coloumn under `tenant_bucket`.
 Then using a bootstrapper updating the bucket in config `filesystems.disks.s3.bucket` during runtime when in Tenant's context and then reverting it back on central context.
 
 ### Roadmap
 
 - [x] Automatic Bucket Creation
 - [x] Selecting the created bucket during Tenancy Bootstrapping.
-- [ ] Deletion of Bucket when the Tenant is deleted.
+- [x] Deletion of Bucket when the Tenant is deleted.
 - [ ] Testing with Amazon S3 service.
 
 > **Note:** I have still not tested this package under ***production*** environment or with a real AWS S3 Bucket. I have only tested it under ***development*** environment using [MinIO](https://min.io/). I will update this after testing it on AWS S3 Bucket with an additional section on AWS IAM Policy Setup for creating the buckets using `aws-sdk-php`. Untill then, if you have tested, a PR is welcome.
@@ -71,7 +71,7 @@ Vidwan\TenantBuckets\Bootstrappers\TenantBucketBootstrapper::class
 
 #### Part **b**.
 
-Make sure the `s3` is commented in `tenancy.filesystem.disks` config.
+Make sure the `s3` is commented in `tenancy.filesystem.disks` config or else it conflicts with the tenancy itself.
 
 **File:** `config/tenancy.php`
 ```php
@@ -87,11 +87,13 @@ Make sure the `s3` is commented in `tenancy.filesystem.disks` config.
 
 ### 3. Job Pipeline
 
-Add `Vidwan\TenantBuckets\Jobs\CreateTenantBucket` in `JobPipeline::make()`
+Add `Vidwan\TenantBuckets\Jobs\CreateTenantBucket` & `Vidwan\TenantBuckets\Jobs\DeleteTenantBucket` in `JobPipeline::make()`. As the name suggests, the former Creates a New Bucket on Tenant Creation and the later Deletes it when a Tenant is being Deleted.
 
 **File:** `app/Providers/TenancyServiceProviders.php`
 ```php
+
 use Vidwan\TenantBuckets\Jobs\CreateTenantBucket;
+use Vidwan\TenantBuckets\Jobs\DeleteTenantBucket;
 
 ...
 
@@ -110,6 +112,14 @@ use Vidwan\TenantBuckets\Jobs\CreateTenantBucket;
                     CreateTenantBucket::class, // <-- Place it Here
 					
                 ])->send(function (Events\TenantCreated $event) {
+                    return $event->tenant;
+                })->shouldBeQueued(false),
+            ],
+            ...
+            Events\DeletingTenant::class => [
+                JobPipeline::make([
+                    DeleteTenantBucket::class, // <-- Place it Here
+                ])->send(function (Events\DeletingTenant $event) {
                     return $event->tenant;
                 })->shouldBeQueued(false),
             ],
