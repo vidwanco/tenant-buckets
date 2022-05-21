@@ -86,7 +86,7 @@ class Bucket
     {
         $bucketName = $this->tenant->tenant_bucket;
 
-        return $bucketName ? $this->deleteBucket($bucketName, $this->credentials) : false;
+        return $bucketName ? $this->deleteBucket($bucketName, $this->credentials) : $this;
     }
 
     /**
