@@ -2,6 +2,14 @@
 
 All notable changes to `tenant-buckets` will be documented in this file.
 
+## Fixed: Delete Job Failing - 2022-05-21
+
+## What's Changed
+
+- Fixed: Delete Job failing due when no bucket was available.
+
+**Full Changelog**: https://github.com/vidwanco/tenant-buckets/compare/v0.0.1...v0.1.1
+
 ## Added: Delete Bucket when tenant is deleted - 2022-05-13
 
 # Key Changes:
