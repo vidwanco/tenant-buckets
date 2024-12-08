@@ -16,8 +16,14 @@
             "role": "Developer"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/tenancy-for-laravel/v4"
+        }
+    ],
     "require": {
-        "php": "^8.0",
+        "php": "^8.2",
         "aws/aws-sdk-php": "~3.0",
         "stancl/tenancy": "dev-master"
     },

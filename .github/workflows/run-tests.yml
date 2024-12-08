@@ -33,6 +33,9 @@ jobs:
       - name: Activate Pest Composer Plugin
         run: composer config --no-plugins allow-plugins.pestphp/pest-plugin true
 
+      - name: Composer Authentication
+        run: composer config github-oauth.github.com ${{ secrets.PRIVATE_PACKAGE_ACCESS_TOKEN }}
+
       - name: Install dependencies
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
