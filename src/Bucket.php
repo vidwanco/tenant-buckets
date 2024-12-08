@@ -15,52 +15,54 @@ use Vidwan\TenantBuckets\Events\DeletingBucket;
 
 class Bucket
 {
-    /**
-     * @access public
-     * @var Stancl\Tenancy\Contracts\TenantWithDatabase Tenant
-     * @var AWS Credentials Object
-     * @var AWS/Minio Endpoint
-     * @var AWS/Minio Region
-     * @var Use Path style endpoint (used for minio)
-     * @access protected
-     * @var string|null Name of the Created Bucket
-     * @var Aws\Exception\AwsException|null Exception Error Bag
-     */
-    public $tenant;
-    public $credentials;
-    public $endpoint;
-    public $region;
-    public string $version = "2006-03-01";
-    public bool $pathStyle = false;
-    protected string|null $createdBucketName;
-    protected AwsException|null $e;
 
     /**
-     * Setup the Bucket Object
-     *
-     * @access public
-     * @param Stancl\Tenancy\Contracts\TenantWithDatabase $tenant Current Teanant
-     * @param Aws\Credentials\Credentials $credentials Aws Credentials Object
-     * @param string $endpoint Aws/Minio Endpoint
-     * @param bool $pathStyle Use Path Style Endpoint (set `true` for minio, default: false)
-     * @return void
-     */
+     * @var \AWS\Credentials\Credentials Credentials Object
+    */
+    protected $credentials;
+
+    /**
+     * @var string AWS/Minio Endpoint
+    */
+    protected $endpoint;
+
+    /**
+     * @var string AWS/Minio Region
+    */
+    protected $region;
+
+    protected string $version = "2006-03-01";
+
+    /**
+     * @var bool Use Path style endpoint (used for minio)
+    */
+    protected bool $pathStyle = false;
+
+    /**
+     * @var string|null Name of the Created Bucket
+    */
+    protected string|null $createdBucketName;
+
+    /**
+     * @var \Aws\Exception\AwsException|null Exception Error Bag
+    */
+    protected AwsException|null $e;
+
     public function __construct(
-        TenantWithDatabase $tenant,
-        ?Credentials $credentials = null,
-        ?string $region = null,
-        ?string $endpoint = null,
-        ?bool $pathStyle = null
+        protected TenantWithDatabase $tenant
     ) {
-        $this->tenant = $tenant;
-        $this->credentials = $credentials ?? new Credentials(
+        $this->setupCredentials();
+    }
+
+    private function setupCredentials()
+    {
+        $this->credentials = new Credentials(
             config('filesystems.disks.s3.key'),
             config('filesystems.disks.s3.secret')
         );
-        $this->region = $region ?? config('filesystems.disks.s3.region');
-        $this->endpoint = $endpoint ?? config('filesystems.disks.s3.endpoint');
-        $pathStyle = $pathStyle ?? config('filesystems.disks.s3.use_path_style_endpoint');
-        $this->pathStyle = $pathStyle ?? $this->pathStyle;
+        $this->region = config('filesystems.disks.s3.region');
+        $this->endpoint = config('filesystems.disks.s3.endpoint');
+        $this->pathStyle = config('filesystems.disks.s3.use_path_style_endpoint', false);
     }
 
     /**
@@ -158,6 +160,8 @@ class Bucket
             ]);
         } catch (AwsException $e) {
             $this->e = $e;
+            if (config('tenant-buckets.errors.throw', true))
+                throw $e;
             Log::error($this->getErrorMessage());
         }
 
