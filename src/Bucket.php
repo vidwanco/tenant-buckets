@@ -3,7 +3,6 @@
 namespace Vidwan\TenantBuckets;
 
 use Aws\Credentials\Credentials;
-
 use Aws\Exception\AwsException;
 use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +14,6 @@ use Vidwan\TenantBuckets\Events\DeletingBucket;
 
 class Bucket
 {
-
     /**
      * @var \AWS\Credentials\Credentials Credentials Object
     */
@@ -160,8 +158,9 @@ class Bucket
             ]);
         } catch (AwsException $e) {
             $this->e = $e;
-            if (config('tenant-buckets.errors.throw', true))
+            if (config('tenant-buckets.errors.throw', true)) {
                 throw $e;
+            }
             Log::error($this->getErrorMessage());
         }
 
