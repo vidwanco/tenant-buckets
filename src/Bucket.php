@@ -6,7 +6,7 @@ use Aws\Credentials\Credentials;
 use Aws\Exception\AwsException;
 use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Log;
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Contracts\Tenant;
 use Vidwan\TenantBuckets\Events\CreatedBucket;
 use Vidwan\TenantBuckets\Events\CreatingBucket;
 use Vidwan\TenantBuckets\Events\DeletedBucket;
@@ -47,7 +47,7 @@ class Bucket
     protected AwsException|null $e;
 
     public function __construct(
-        protected TenantWithDatabase $tenant
+        protected Tenant $tenant
     ) {
         $this->setupCredentials();
     }
@@ -93,7 +93,7 @@ class Bucket
      * Create a New Bucket
      *
      * @param string $name Name of the S3 Bucket
-     * @param Aws\Credentials\Credentials $credentials AWS Credentials Object
+     * @param \Aws\Credentials\Credentials $credentials AWS Credentials Object
      * @access public
      * @return self $this
      */
@@ -134,7 +134,7 @@ class Bucket
      * Create a New Bucket
      *
      * @param string $name Name of the S3 Bucket
-     * @param Aws\Credentials\Credentials $credentials AWS Credentials Object
+     * @param \Aws\Credentials\Credentials $credentials AWS Credentials Object
      * @access public
      * @return self $this
      */
@@ -180,7 +180,7 @@ class Bucket
     }
 
     /**
-     * Get Error Messsge
+     * Get Error Message
      *
      * @return string|null
      */
@@ -198,6 +198,6 @@ class Bucket
      */
     public function getErrorBag(): AwsException|null
     {
-        return $this->e ? $this->e : null;
+        return $this->e ?: null;
     }
 }
