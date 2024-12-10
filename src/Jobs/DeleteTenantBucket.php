@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Contracts\Tenant;
 use Vidwan\TenantBuckets\Bucket;
 
 class DeleteTenantBucket implements ShouldQueue
@@ -42,7 +42,7 @@ class DeleteTenantBucket implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(TenantWithDatabase $tenant)
+    public function __construct(Tenant $tenant)
     {
         //
         $this->tenant = $tenant;
