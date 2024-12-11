@@ -18,12 +18,6 @@ class DeleteTenantBucket implements ShouldQueue
     use SerializesModels;
 
     /**
-     * Current Tenant
-     * @access protected
-     */
-    protected $tenant;
-
-    /**
      * The number of times the job may be attempted.
      *
      * @var int
@@ -42,11 +36,7 @@ class DeleteTenantBucket implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Tenant $tenant)
-    {
-        //
-        $this->tenant = $tenant;
-    }
+    public function __construct(protected Tenant $tenant) {}
 
     /**
      * Execute the job.
@@ -55,8 +45,7 @@ class DeleteTenantBucket implements ShouldQueue
      */
     public function handle()
     {
-        $bucket = new Bucket($this->tenant);
-        $delete = $bucket->deleteTenantBucket();
+        (new Bucket($this->tenant))->deleteTenantBucket();
     }
 
     /**
