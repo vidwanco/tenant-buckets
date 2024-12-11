@@ -6,6 +6,22 @@
 
 Automatically Provision AWS S3 Buckets for each tenant. It's an Extention for [stancl/tenancy](https://github.com/stancl/tenancy). For more details refer to [TenancyForLaravel](https://tenancyforlaravel.com/).
 
+## Tenancy V4.x
+
+Use branch [tenancy-v4](https://github.com/vidwanco/tenant-buckets/tree/tenancy-v4) for Tenancy v4.x versions.
+
+Use `dev-tenancy-v4` for pulling latest changes from branch.
+
+```bash
+composer require vidwan/tenant-buckets:dev-tenancy-v4
+```
+
+Or just use a Release Candidate:
+
+```bash
+composer require vidwan/tenant-buckets:^4.0.0-rc
+```
+
 ## Concept
 
 The concept is simple, to automatically provison a new AWS S3 bucket for tenant on registration and update the same on the central database's tenant table & data coloumn under `tenant_bucket`.
