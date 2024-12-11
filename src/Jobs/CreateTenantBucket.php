@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Contracts\Tenant;
 use Vidwan\TenantBuckets\Bucket;
 
 class CreateTenantBucket implements ShouldQueue
@@ -16,12 +16,6 @@ class CreateTenantBucket implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
-
-    /**
-     * Current Tenant
-     * @access protected
-     */
-    protected $tenant;
 
     /**
      * The number of times the job may be attempted.
@@ -42,10 +36,8 @@ class CreateTenantBucket implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(TenantWithDatabase $tenant)
+    public function __construct(protected Tenant $tenant)
     {
-        //
-        $this->tenant = $tenant;
     }
 
     /**
@@ -55,11 +47,7 @@ class CreateTenantBucket implements ShouldQueue
      */
     public function handle()
     {
-        $bucket = new Bucket($this->tenant);
-        $create = $bucket->createTenantBucket();
-
-        // $this->tenant->tenant_bucket = $create->getBucketName();
-        // $this->tenant->save();
+        (new Bucket($this->tenant))->createTenantBucket();
     }
 
     /**

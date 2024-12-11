@@ -3,70 +3,65 @@
 namespace Vidwan\TenantBuckets;
 
 use Aws\Credentials\Credentials;
-
 use Aws\Exception\AwsException;
 use Aws\S3\S3Client;
-use Illuminate\Support\Facades\Log;
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Contracts\Tenant;
 use Vidwan\TenantBuckets\Events\CreatedBucket;
 use Vidwan\TenantBuckets\Events\CreatingBucket;
 use Vidwan\TenantBuckets\Events\DeletedBucket;
 use Vidwan\TenantBuckets\Events\DeletingBucket;
+use Vidwan\TenantBuckets\Exceptions\CreateBucketException;
+use Vidwan\TenantBuckets\Exceptions\DeleteBucketException;
 
 class Bucket
 {
     /**
-     * @access public
-     * @var Stancl\Tenancy\Contracts\TenantWithDatabase Tenant
-     * @var AWS Credentials Object
-     * @var AWS/Minio Endpoint
-     * @var AWS/Minio Region
-     * @var Use Path style endpoint (used for minio)
-     * @access protected
-     * @var string|null Name of the Created Bucket
-     * @var Aws\Exception\AwsException|null Exception Error Bag
-     */
-    public $tenant;
-    public $credentials;
-    public $endpoint;
-    public $region;
-    public string $version = "2006-03-01";
-    public bool $pathStyle = false;
-    protected string|null $createdBucketName;
-    protected AwsException|null $e;
+     * @var \AWS\Credentials\Credentials Credentials Object
+    */
+    protected $credentials;
 
     /**
-     * Setup the Bucket Object
-     *
-     * @access public
-     * @param Stancl\Tenancy\Contracts\TenantWithDatabase $tenant Current Teanant
-     * @param Aws\Credentials\Credentials $credentials Aws Credentials Object
-     * @param string $endpoint Aws/Minio Endpoint
-     * @param bool $pathStyle Use Path Style Endpoint (set `true` for minio, default: false)
-     * @return void
-     */
+     * @var string AWS/Minio Endpoint
+    */
+    protected $endpoint;
+
+    /**
+     * @var string AWS/Minio Region
+    */
+    protected $region;
+
+    protected string $version = "2006-03-01";
+
+    /**
+     * @var bool Use Path style endpoint (used for minio)
+    */
+    protected bool $pathStyle = false;
+
+    /**
+     * @var string|null Name of the Created Bucket
+    */
+    protected string|null $bucketName;
+
     public function __construct(
-        TenantWithDatabase $tenant,
-        ?Credentials $credentials = null,
-        ?string $region = null,
-        ?string $endpoint = null,
-        ?bool $pathStyle = null
+        protected Tenant $tenant
     ) {
-        $this->tenant = $tenant;
-        $this->credentials = $credentials ?? new Credentials(
+        $this->setupCredentials();
+    }
+
+    private function setupCredentials()
+    {
+        $this->credentials = new Credentials(
             config('filesystems.disks.s3.key'),
             config('filesystems.disks.s3.secret')
         );
-        $this->region = $region ?? config('filesystems.disks.s3.region');
-        $this->endpoint = $endpoint ?? config('filesystems.disks.s3.endpoint');
-        $pathStyle = $pathStyle ?? config('filesystems.disks.s3.use_path_style_endpoint');
-        $this->pathStyle = $pathStyle ?? $this->pathStyle;
+        $this->region = config('filesystems.disks.s3.region');
+        $this->endpoint = config('filesystems.disks.s3.endpoint');
+        $this->pathStyle = config('filesystems.disks.s3.use_path_style_endpoint', false);
     }
 
     /**
      * Create Tenant Specific Bucket
      *
-     * @access public
      * @return self $this
      */
     public function createTenantBucket(): self
@@ -79,7 +74,6 @@ class Bucket
     /**
      * Delete Tenant Specific Bucket
      *
-     * @access public
      * @return self $this
      */
     public function deleteTenantBucket(): self
@@ -93,8 +87,7 @@ class Bucket
      * Create a New Bucket
      *
      * @param string $name Name of the S3 Bucket
-     * @param Aws\Credentials\Credentials $credentials AWS Credentials Object
-     * @access public
+     * @param \Aws\Credentials\Credentials $credentials AWS Credentials Object
      * @return self $this
      */
     public function createBucket(string $name, Credentials $credentials): self
@@ -108,21 +101,21 @@ class Bucket
             "version" => $this->version,
             "use_path_style_endpoint" => $this->pathStyle,
         ];
+        $this->bucketName = $this->formatBucketName($name);
 
         $client = new S3Client($params);
 
         try {
-            $exec = $client->createBucket([
-                'Bucket' => $name,
+            $client->createBucket([
+                'Bucket' => $this->bucketName,
             ]);
-            $this->createdBucketName = $name;
 
             // Update Tenant
-            $this->tenant->tenant_bucket = $name;
+            $this->tenant->tenant_bucket = $this->bucketName;
             $this->tenant->save();
         } catch (AwsException $e) {
-            $this->e = $e;
-            Log::error($this->getErrorMessage());
+            // We catch to set the error bag
+            throw new CreateBucketException($this->tenant, $this->bucketName, $e);
         }
 
         event(new CreatedBucket($this->tenant));
@@ -134,13 +127,12 @@ class Bucket
      * Create a New Bucket
      *
      * @param string $name Name of the S3 Bucket
-     * @param Aws\Credentials\Credentials $credentials AWS Credentials Object
-     * @access public
+     * @param \Aws\Credentials\Credentials $credentials AWS Credentials Object
      * @return self $this
      */
     public function deleteBucket(string $name, Credentials $credentials): self
     {
-        event(new DeletingBucket($this->tenant));
+        event(new DeletingBucket(tenant: $this->tenant));
 
         $params = [
             "credentials" => $credentials,
@@ -153,12 +145,12 @@ class Bucket
         $client = new S3Client($params);
 
         try {
-            $exec = $client->deleteBucket([
+            $client->deleteBucket([
                 'Bucket' => $name,
             ]);
         } catch (AwsException $e) {
-            $this->e = $e;
-            Log::error($this->getErrorMessage());
+            // We catch to set the error bag
+            throw new DeleteBucketException($this->tenant, $name, $e);
         }
 
         event(new DeletedBucket($this->tenant));
@@ -173,28 +165,16 @@ class Bucket
      */
     public function getBucketName(): string|null
     {
-        return $this->createdBucketName;
+        return $this->bucketName;
     }
 
     /**
-     * Get Error Messsge
-     *
-     * @return string|null
+     * Format Bucket Name according to AWS S3 Bucket Naming Rules
+     * @see https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
+     * @param string $name
      */
-    public function getErrorMessage(): string|null
+    protected function formatBucketName(string $name): string
     {
-        return ($this->e) ?
-        "Error: " . $this->e->getAwsErrorMessage() :
-        null;
-    }
-
-    /**
-     * Get Error Bag
-     *
-     * @return AwsException|null
-     */
-    public function getErrorBag(): AwsException|null
-    {
-        return $this->e ? $this->e : null;
+        return str(preg_replace('/[^a-zA-Z0-9]/', '', $name))->lower()->toString();
     }
 }

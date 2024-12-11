@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Contracts\Tenant;
 use Vidwan\TenantBuckets\Bucket;
 
 class DeleteTenantBucket implements ShouldQueue
@@ -16,12 +16,6 @@ class DeleteTenantBucket implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
-
-    /**
-     * Current Tenant
-     * @access protected
-     */
-    protected $tenant;
 
     /**
      * The number of times the job may be attempted.
@@ -42,10 +36,8 @@ class DeleteTenantBucket implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(TenantWithDatabase $tenant)
+    public function __construct(protected Tenant $tenant)
     {
-        //
-        $this->tenant = $tenant;
     }
 
     /**
@@ -55,8 +47,7 @@ class DeleteTenantBucket implements ShouldQueue
      */
     public function handle()
     {
-        $bucket = new Bucket($this->tenant);
-        $delete = $bucket->deleteTenantBucket();
+        (new Bucket($this->tenant))->deleteTenantBucket();
     }
 
     /**
