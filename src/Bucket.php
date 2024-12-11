@@ -39,12 +39,12 @@ class Bucket
     /**
      * @var string|null Name of the Created Bucket
     */
-    protected string|null $createdBucketName;
+    protected string|null $bucketName;
 
     /**
      * @var \Aws\Exception\AwsException|null Exception Error Bag
     */
-    protected AwsException|null $e;
+    protected AwsException|null $e = null;
 
     public function __construct(
         protected Tenant $tenant
@@ -66,7 +66,6 @@ class Bucket
     /**
      * Create Tenant Specific Bucket
      *
-     * @access public
      * @return self $this
      */
     public function createTenantBucket(): self
@@ -79,7 +78,6 @@ class Bucket
     /**
      * Delete Tenant Specific Bucket
      *
-     * @access public
      * @return self $this
      */
     public function deleteTenantBucket(): self
@@ -94,7 +92,6 @@ class Bucket
      *
      * @param string $name Name of the S3 Bucket
      * @param \Aws\Credentials\Credentials $credentials AWS Credentials Object
-     * @access public
      * @return self $this
      */
     public function createBucket(string $name, Credentials $credentials): self
@@ -108,21 +105,22 @@ class Bucket
             "version" => $this->version,
             "use_path_style_endpoint" => $this->pathStyle,
         ];
+        $this->bucketName = $this->formatBucketName($name);
 
         $client = new S3Client($params);
 
         try {
-            $exec = $client->createBucket([
+            $client->createBucket([
                 'Bucket' => $name,
             ]);
-            $this->createdBucketName = $name;
 
             // Update Tenant
             $this->tenant->tenant_bucket = $name;
             $this->tenant->save();
         } catch (AwsException $e) {
             $this->e = $e;
-            Log::error($this->getErrorMessage());
+            throw_if(config('app.debug', false), $e);
+            Log::critical($this->getErrorMessage());
         }
 
         event(new CreatedBucket($this->tenant));
@@ -135,12 +133,11 @@ class Bucket
      *
      * @param string $name Name of the S3 Bucket
      * @param \Aws\Credentials\Credentials $credentials AWS Credentials Object
-     * @access public
      * @return self $this
      */
     public function deleteBucket(string $name, Credentials $credentials): self
     {
-        event(new DeletingBucket($this->tenant));
+        event(new DeletingBucket(tenant: $this->tenant));
 
         $params = [
             "credentials" => $credentials,
@@ -153,15 +150,13 @@ class Bucket
         $client = new S3Client($params);
 
         try {
-            $exec = $client->deleteBucket([
+            $client->deleteBucket([
                 'Bucket' => $name,
             ]);
         } catch (AwsException $e) {
             $this->e = $e;
-            if (config('tenant-buckets.errors.throw', true)) {
-                throw $e;
-            }
-            Log::error($this->getErrorMessage());
+            throw_if(config('app.debug'), $e);
+            Log::critical($this->getErrorMessage());
         }
 
         event(new DeletedBucket($this->tenant));
@@ -176,7 +171,17 @@ class Bucket
      */
     public function getBucketName(): string|null
     {
-        return $this->createdBucketName;
+        return $this->bucketName;
+    }
+
+    /**
+     * Format Bucket Name according to AWS S3 Bucket Naming Rules
+     * @see https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
+     * @param string $name
+     */
+    protected function formatBucketName(string $name): string
+    {
+        return str(preg_replace('/[^a-zA-Z0-9]/', '', $name))->lower()->toString();
     }
 
     /**
@@ -186,9 +191,18 @@ class Bucket
      */
     public function getErrorMessage(): string|null
     {
-        return ($this->e) ?
-        "Error: " . $this->e->getAwsErrorMessage() :
-        null;
+        if ($this->e) {
+            $data = [
+                'tenant' => $this->tenant->id,
+                'bucket' => $this->bucketName,
+                'error_code' => $this->e?->getAwsErrorCode(),
+                'error_type' => $this->e?->getAwsErrorType(),
+                'error_message' => $this->e?->getAwsErrorMessage(),
+                'response' => $this->e?->getResponse(),
+            ];
+            return "[tenant-buckets] Error: (Tenant ID: {$this->tenant->id}) {$this->e->getAwsErrorMessage()} ". json_encode($data);
+        }
+        return null;
     }
 
     /**

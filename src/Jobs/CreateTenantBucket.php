@@ -18,12 +18,6 @@ class CreateTenantBucket implements ShouldQueue
     use SerializesModels;
 
     /**
-     * Current Tenant
-     * @access protected
-     */
-    protected $tenant;
-
-    /**
      * The number of times the job may be attempted.
      *
      * @var int
@@ -42,11 +36,7 @@ class CreateTenantBucket implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Tenant $tenant)
-    {
-        //
-        $this->tenant = $tenant;
-    }
+    public function __construct(protected Tenant $tenant) {}
 
     /**
      * Execute the job.
@@ -55,11 +45,7 @@ class CreateTenantBucket implements ShouldQueue
      */
     public function handle()
     {
-        $bucket = new Bucket($this->tenant);
-        $create = $bucket->createTenantBucket();
-
-        // $this->tenant->tenant_bucket = $create->getBucketName();
-        // $this->tenant->save();
+        (new Bucket($this->tenant))->createTenantBucket();
     }
 
     /**
