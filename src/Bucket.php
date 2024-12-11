@@ -177,5 +177,4 @@ class Bucket
     {
         return str(preg_replace('/[^a-zA-Z0-9]/', '', $name))->lower()->toString();
     }
-
 }

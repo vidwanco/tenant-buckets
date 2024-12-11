@@ -8,7 +8,6 @@ use Throwable;
 
 abstract class BaseException extends Exception
 {
-
     protected array $data;
 
     protected AwsException $awsException;

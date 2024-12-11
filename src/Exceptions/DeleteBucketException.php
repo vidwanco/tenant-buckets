@@ -7,15 +7,13 @@ use Stancl\Tenancy\Contracts\Tenant;
 
 class DeleteBucketException extends BaseException
 {
-
     public function __construct(
         protected Tenant $tenant,
         protected string $bucketName,
         protected AwsException $awsException
-    )
-    {
+    ) {
         $message = "[tenant-buckets] Error: (Tenant ID: {$tenant->id}) {$awsException->getAwsErrorMessage()}";
-        parent::__construct($message,$awsException->getCode(), $awsException);
+        parent::__construct($message, $awsException->getCode(), $awsException);
 
         $this->setData();
     }
@@ -30,7 +28,7 @@ class DeleteBucketException extends BaseException
             'error_message' => $this->awsException->getAwsErrorMessage(),
             'response' => $this->awsException->getResponse(),
         ];
+
         return $this;
     }
-
 }
