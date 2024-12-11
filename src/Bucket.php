@@ -111,11 +111,11 @@ class Bucket
 
         try {
             $client->createBucket([
-                'Bucket' => $name,
+                'Bucket' => $this->bucketName,
             ]);
 
             // Update Tenant
-            $this->tenant->tenant_bucket = $name;
+            $this->tenant->tenant_bucket = $this->bucketName;
             $this->tenant->save();
         } catch (AwsException $e) {
             $this->e = $e;
@@ -155,7 +155,7 @@ class Bucket
             ]);
         } catch (AwsException $e) {
             $this->e = $e;
-            throw_if(config('app.debug'), $e);
+            throw_if(config('app.debug', false), $e);
             Log::critical($this->getErrorMessage());
         }
 
