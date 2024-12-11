@@ -5,12 +5,13 @@ namespace Vidwan\TenantBuckets;
 use Aws\Credentials\Credentials;
 use Aws\Exception\AwsException;
 use Aws\S3\S3Client;
-use Illuminate\Support\Facades\Log;
 use Stancl\Tenancy\Contracts\Tenant;
 use Vidwan\TenantBuckets\Events\CreatedBucket;
 use Vidwan\TenantBuckets\Events\CreatingBucket;
 use Vidwan\TenantBuckets\Events\DeletedBucket;
 use Vidwan\TenantBuckets\Events\DeletingBucket;
+use Vidwan\TenantBuckets\Exceptions\CreateBucketException;
+use Vidwan\TenantBuckets\Exceptions\DeleteBucketException;
 
 class Bucket
 {
@@ -40,11 +41,6 @@ class Bucket
      * @var string|null Name of the Created Bucket
     */
     protected string|null $bucketName;
-
-    /**
-     * @var \Aws\Exception\AwsException|null Exception Error Bag
-    */
-    protected AwsException|null $e = null;
 
     public function __construct(
         protected Tenant $tenant
@@ -118,9 +114,8 @@ class Bucket
             $this->tenant->tenant_bucket = $this->bucketName;
             $this->tenant->save();
         } catch (AwsException $e) {
-            $this->e = $e;
-            throw_if(config('app.debug', false), $e);
-            Log::critical($this->getErrorMessage());
+            // We catch to set the error bag
+            throw new CreateBucketException($this->tenant, $this->bucketName, $e);
         }
 
         event(new CreatedBucket($this->tenant));
@@ -154,9 +149,8 @@ class Bucket
                 'Bucket' => $name,
             ]);
         } catch (AwsException $e) {
-            $this->e = $e;
-            throw_if(config('app.debug', false), $e);
-            Log::critical($this->getErrorMessage());
+            // We catch to set the error bag
+            throw new DeleteBucketException($this->tenant, $name, $e);
         }
 
         event(new DeletedBucket($this->tenant));
@@ -184,36 +178,4 @@ class Bucket
         return str(preg_replace('/[^a-zA-Z0-9]/', '', $name))->lower()->toString();
     }
 
-    /**
-     * Get Error Message
-     *
-     * @return string|null
-     */
-    public function getErrorMessage(): string|null
-    {
-        if ($this->e) {
-            $data = [
-                'tenant' => $this->tenant->id,
-                'bucket' => $this->bucketName,
-                'error_code' => $this->e?->getAwsErrorCode(),
-                'error_type' => $this->e?->getAwsErrorType(),
-                'error_message' => $this->e?->getAwsErrorMessage(),
-                'response' => $this->e?->getResponse(),
-            ];
-
-            return "[tenant-buckets] Error: (Tenant ID: {$this->tenant->id}) {$this->e->getAwsErrorMessage()} ". json_encode($data);
-        }
-
-        return null;
-    }
-
-    /**
-     * Get Error Bag
-     *
-     * @return AwsException|null
-     */
-    public function getErrorBag(): AwsException|null
-    {
-        return $this->e ?: null;
-    }
 }
