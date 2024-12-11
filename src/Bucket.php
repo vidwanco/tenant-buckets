@@ -200,8 +200,10 @@ class Bucket
                 'error_message' => $this->e?->getAwsErrorMessage(),
                 'response' => $this->e?->getResponse(),
             ];
+
             return "[tenant-buckets] Error: (Tenant ID: {$this->tenant->id}) {$this->e->getAwsErrorMessage()} ". json_encode($data);
         }
+
         return null;
     }
 

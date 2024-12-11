@@ -36,7 +36,9 @@ class CreateTenantBucket implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected Tenant $tenant) {}
+    public function __construct(protected Tenant $tenant)
+    {
+    }
 
     /**
      * Execute the job.
